@@ -16,8 +16,8 @@ let graph: {
 };
 
 const rl = readline.createInterface({
-  input: fs.createReadStream("exemplo_nao_euleriano2.txt")
-  // input: fs.createReadStream("exemplo.txt")
+  // input: fs.createReadStream("exemplo_nao_euleriano2.txt")
+  input: fs.createReadStream("exemplo.txt")
 });
 
 rl.on("line", line => {
@@ -128,45 +128,41 @@ const flattenVertices = (vertices: Vertice[]): number[] =>
   vertices.reduce((prev, curr) => [...prev, ...curr], []);
 
 const mergeCircuits = (circuits: number[][]): string => {
-  let merged: number[] = [];
-  const circuitsWrapper = circuits.map(c => ({ c, used: false }));
+  let merged = circuits.pop() as number[];
 
-  // Tentamos juntar os circuitos de todas as maneiras possiveis.
-  // Se nao for possivel eh porque o grafo nao eh conectado.
-  for (let i = 0; i < circuitsWrapper.length; i++) {
-    for (let j = 0; j < circuitsWrapper.length; j++) {
-      if (i !== j && !circuitsWrapper[i].used && !circuitsWrapper[j].used) {
-        // Achamos qual a posicao no caminho a
-        // em que devemos inserir o caminho b.
-        const circuit = circuitsWrapper[j].c;
-        const anotherCircuit = circuitsWrapper[i].c;
-        const init = anotherCircuit[0];
-        const positionToInsert = circuit.indexOf(init);
+  let shouldContinue = true;
 
-        // Caso nao seja possivel juntar os circuitos
-        // tenta-se os proximos arranjos.
-        if (positionToInsert !== -1) {
-          circuitsWrapper[i].used = true;
-          circuitsWrapper[j].used = true;
+  while (shouldContinue) {
+    shouldContinue = false;
+    circuits.forEach(circuit => {
+      const init = circuit[0];
+      const positionToInsert = merged.indexOf(init);
 
-          // O array end nao contem o vertice que eh o init do novo grafo.
-          // Assim podemos inserir este novo circuito antes desta parte.
-          // Por exemplo, se o circuito antigo eh '1 2 3 4 1' e o novo eh '3 5 3'
-          // beg == [1, 2]
-          // end == [4, 1]
-          const beg = [...circuit].slice(0, positionToInsert);
-          const end = [...circuit].slice(positionToInsert + 1);
+      if (positionToInsert !== -1) {
+        // Esse circuito pode ser removido do array pois sera usado
+        // OBS da linguagem: Esta remocao nao altera os proximos valores
+        // que serao iterados pelo forEach e multiplas alteracoes
+        let indexToRemove = circuits.indexOf(circuit);
+        circuits.splice(indexToRemove, 1);
 
-          // Juntamos o circuito completo.
-          merged = [...beg, ...anotherCircuit, ...end];
-        }
+        // O loop pode continuar porque o merged foi alterado
+        shouldContinue = true;
+
+        // O array end nao contem o vertice que eh o init do novo grafo.
+        // Assim podemos inserir este novo circuito antes desta parte.
+        // Por exemplo, se o circuito antigo eh '1 2 3 4 1' e o novo eh '3 5 3'
+        // beg == [1, 2]
+        // end == [4, 1]
+        const beg = [...merged].slice(0, positionToInsert);
+        const end = [...merged].slice(positionToInsert + 1);
+
+        // Juntamos o circuito completo.
+        merged = [...beg, ...circuit, ...end];
       }
-    }
+    });
   }
 
-  const nonUsed = circuitsWrapper.filter(w => !w.used);
-
-  if (nonUsed.length !== 0) {
+  if (circuits.length !== 0) {
     // Se nao achar o caminho eh porque o grafo nao eh conectado.
     // Como no exemplo_nao_euleriano2.txt
     throw Error();
