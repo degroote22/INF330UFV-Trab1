@@ -20,6 +20,25 @@ rl.on("line", function (line) {
         processLine(line);
     }
 });
+var initGraph = function (line) {
+    var numbers = line.split(" ");
+    graph.verticesNumber = Number(numbers[0]);
+    graph.edgesNumber = Number(numbers[1]);
+    graph.initialized = true;
+    for (var i = 0; i < graph.verticesNumber; i++) {
+        graph.vertices[i] = [];
+    }
+};
+var processLine = function (line) {
+    var numbers = line.split(" ");
+    // Como a contagem dos indices comeca de 1 no arquivo texto,
+    // aqui eh normalizado para comecar em 0.
+    var from = Number(numbers[0]) - 1;
+    var to = Number(numbers[1]) - 1;
+    // Cada vertice guarda o numero do outro vertice ao qual eh ligado.
+    graph.vertices[from] = graph.vertices[from].concat([to]);
+    graph.vertices[to] = graph.vertices[to].concat([from]);
+};
 rl.on("close", function () {
     if (hasOnlyEvenDegrees(graph.vertices)) {
         try {
@@ -52,24 +71,27 @@ var hasOnlyEvenDegrees = function (vertices) {
         return prevResult && isEven;
     }, true);
 };
-var initGraph = function (line) {
-    var numbers = line.split(" ");
-    graph.verticesNumber = Number(numbers[0]);
-    graph.edgesNumber = Number(numbers[1]);
-    graph.initialized = true;
-    for (var i = 0; i < graph.verticesNumber; i++) {
-        graph.vertices[i] = [];
+var HierholzerPath = function (vertices) {
+    var edgesRemaining = flattenVertices(vertices);
+    // -- Comece de um vértice qualquer
+    // -- Crie um circuito C sem repetir aresta
+    // -- (ao usar uma aresta para chegar em um vértice escolha outra não usada para sair)
+    var startingCircuit = createCircuit([0], vertices);
+    var circuits = [startingCircuit];
+    while (edgesRemaining.length !== 0) {
+        // Ainda ha arestas para processar
+        // -- Senão, enquanto C não incluir todas as arestas,
+        // -- construa outro circuito a partir de um vértice de C com arestas não usadas,
+        // Achamos um vertice que ainda tenha arestas disponiveis.
+        var init = findNonEmptyVerticeIndex(vertices, 0);
+        // Montamos um novo circuito comecando dessa aresta.
+        var newCircuit = createCircuit([init], vertices);
+        circuits = circuits.concat([newCircuit]);
+        edgesRemaining = flattenVertices(vertices);
     }
-};
-var processLine = function (line) {
-    var numbers = line.split(" ");
-    // Como a contagem dos indices comeca de 1 no arquivo texto,
-    // aqui eh normalizado para comecar em 0.
-    var from = Number(numbers[0]) - 1;
-    var to = Number(numbers[1]) - 1;
-    // Cada vertice guarda o numero do outro vertice ao qual eh ligado.
-    graph.vertices[from] = graph.vertices[from].concat([to]);
-    graph.vertices[to] = graph.vertices[to].concat([from]);
+    // -- e "junte" esse circuito a C
+    // -- Se C inclui todas arestas, eis o circuito euleriano.
+    return mergeCircuits(circuits);
 };
 var createCircuit = function (circuit, vertices) {
     // O proximo vertice eh o ultimo que esta no circuito.
@@ -119,7 +141,6 @@ var mergeCircuits = function (circuits) {
                 // OBS da linguagem: Esta remocao nao altera os proximos valores
                 // que serao iterados pelo forEach e multiplas alteracoes
                 var indexToRemove = circuits.indexOf(circuit);
-                console.log(indexToRemove);
                 circuits.splice(indexToRemove, 1);
                 // O loop pode continuar porque o merged foi alterado
                 shouldContinue = true;
@@ -145,26 +166,4 @@ var mergeCircuits = function (circuits) {
     // o circuito jah formatado como string e com o primeiro indice
     // comecando em 1.
     return merged.map(function (n) { return n + 1; }).join(" ");
-};
-var HierholzerPath = function (vertices) {
-    var edgesRemaining = flattenVertices(vertices);
-    // -- Comece de um vértice qualquer
-    // -- Crie um circuito C sem repetir aresta
-    // -- (ao usar uma aresta para chegar em um vértice escolha outra não usada para sair)
-    var startingCircuit = createCircuit([0], vertices);
-    var circuits = [startingCircuit];
-    while (edgesRemaining.length !== 0) {
-        // Ainda ha arestas para processar
-        // -- Senão, enquanto C não incluir todas as arestas,
-        // -- construa outro circuito a partir de um vértice de C com arestas não usadas,
-        // Achamos um vertice que ainda tenha arestas disponiveis.
-        var init = findNonEmptyVerticeIndex(vertices, 0);
-        // Montamos um novo circuito comecando dessa aresta.
-        var newCircuit = createCircuit([init], vertices);
-        circuits = circuits.concat([newCircuit]);
-        edgesRemaining = flattenVertices(vertices);
-    }
-    // -- e "junte" esse circuito a C
-    // -- Se C inclui todas arestas, eis o circuito euleriano.
-    return mergeCircuits(circuits);
 };
