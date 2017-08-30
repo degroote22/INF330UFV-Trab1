@@ -128,32 +128,33 @@ const flattenVertices = (vertices: Vertice[]): number[] =>
   vertices.reduce((prev, curr) => [...prev, ...curr], []);
 
 const mergeCircuits = (circuits: number[][]): string => {
-  const length = circuits.length;
   let merged: number[] = [];
-
   const circuitsWrapper = circuits.map(c => ({ c, used: false }));
 
   // Tentamos juntar os circuitos de todas as maneiras possiveis.
   // Se nao for possivel eh porque o grafo nao eh conectado.
-  for (let i = 0; i < length; i++) {
-    for (let j = 0; j < length; j++) {
+  for (let i = 0; i < circuitsWrapper.length; i++) {
+    for (let j = 0; j < circuitsWrapper.length; j++) {
       if (i !== j && !circuitsWrapper[i].used && !circuitsWrapper[j].used) {
-        // Achamos qual a posicao no caminho no caminho anterior
-        // que devemos inserir o novo caminho.
+        // Achamos qual a posicao no caminho a
+        // em que devemos inserir o caminho b.
         const circuit = circuitsWrapper[j].c;
         const anotherCircuit = circuitsWrapper[i].c;
         const init = anotherCircuit[0];
         const positionToInsert = circuit.indexOf(init);
+
+        // Caso nao seja possivel juntar os circuitos
+        // tenta-se os proximos arranjos.
         if (positionToInsert !== -1) {
           circuitsWrapper[i].used = true;
           circuitsWrapper[j].used = true;
-          const beg = [...circuit].slice(0, positionToInsert);
 
           // O array end nao contem o vertice que eh o init do novo grafo.
           // Assim podemos inserir este novo circuito antes desta parte.
           // Por exemplo, se o circuito antigo eh '1 2 3 4 1' e o novo eh '3 5 3'
           // beg == [1, 2]
-          // ebd == [4, 1]
+          // end == [4, 1]
+          const beg = [...circuit].slice(0, positionToInsert);
           const end = [...circuit].slice(positionToInsert + 1);
 
           // Juntamos o circuito completo.
