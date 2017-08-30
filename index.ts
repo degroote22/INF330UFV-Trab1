@@ -16,7 +16,8 @@ let graph: {
 };
 
 const rl = readline.createInterface({
-  input: fs.createReadStream("exemplo.txt")
+  input: fs.createReadStream("exemplo_nao_euleriano2.txt")
+  // input: fs.createReadStream("exemplo.txt")
 });
 
 rl.on("line", line => {
@@ -37,7 +38,7 @@ rl.on("close", () => {
         JSON.stringify(graph.vertices)
       ) as Vertice[];
 
-      const circuit = HierholzerPath(verticesCopy, []);
+      const circuit = HierholzerPath(verticesCopy);
 
       console.log("Eh um grafo euleriano.");
       console.log("Caminho: " + circuit);
@@ -123,60 +124,86 @@ const findNonEmptyVerticeIndex = (
   }
 };
 
-const HierholzerPath = (vertices: Vertice[], circuit: number[]): string => {
-  const edgesLeft = vertices.reduce((prev, curr) => [...prev, ...curr], []);
-  if (edgesLeft.length === 0) {
-    // -- Se C inclui todas arestas, eis o circuito euleriano.
-    // Se nao ha mais arestas para processar, basta retornar
-    // o circuito jah formatado como string e com o primeiro indice
-    // comecando em 1.
-    return circuit.map(n => n + 1).join(" ");
-  } else {
-    // Ainda ha arestas para processar
+const flattenVertices = (vertices: Vertice[]): number[] =>
+  vertices.reduce((prev, curr) => [...prev, ...curr], []);
 
-    if (circuit.length === 0) {
-      // -- Comece de um vértice qualquer
-      // -- Crie um circuito C sem repetir aresta
-      // -- (ao usar uma aresta para chegar em um vértice escolha outra não usada para sair)
-      // Se a funcao nao recebeu nenhum circuito
-      // eh porque o processamento esta comecando agora.
+const mergeCircuits = (circuits: number[][]): string => {
+  const length = circuits.length;
+  let merged: number[] = [];
 
-      const newCircuit = createCircuit([0], vertices);
-      return HierholzerPath(vertices, newCircuit);
-    } else {
-      // -- Senão, enquanto C não incluir todas as arestas,
-      // -- construa outro circuito a partir de um vértice de C com arestas não usadas,
-      // -- e "junte" esse circuito a C
+  const circuitsWrapper = circuits.map(c => ({ c, used: false }));
 
-      // Achamos um vertice que ainda tenha arestas disponiveis.
-      const init = findNonEmptyVerticeIndex(vertices, 0);
+  // Tentamos juntar os circuitos de todas as maneiras possiveis.
+  // Se nao for possivel eh porque o grafo nao eh conectado.
+  for (let i = 0; i < length; i++) {
+    for (let j = 0; j < length; j++) {
+      if (i !== j && !circuitsWrapper[i].used && !circuitsWrapper[j].used) {
+        // Achamos qual a posicao no caminho no caminho anterior
+        // que devemos inserir o novo caminho.
+        const circuit = circuitsWrapper[j].c;
+        const anotherCircuit = circuitsWrapper[i].c;
+        const init = anotherCircuit[0];
+        const positionToInsert = circuit.indexOf(init);
+        if (positionToInsert !== -1) {
+          circuitsWrapper[i].used = true;
+          circuitsWrapper[j].used = true;
+          const beg = [...circuit].slice(0, positionToInsert);
 
-      // Montamos um novo circuito comecando dessa aresta.
-      const newCircuit = createCircuit([init], vertices);
+          // O array end nao contem o vertice que eh o init do novo grafo.
+          // Assim podemos inserir este novo circuito antes desta parte.
+          // Por exemplo, se o circuito antigo eh '1 2 3 4 1' e o novo eh '3 5 3'
+          // beg == [1, 2]
+          // ebd == [4, 1]
+          const end = [...circuit].slice(positionToInsert + 1);
 
-      // Achamos qual a posicao no caminho no caminho anterior
-      // que devemos inserir o novo caminho.
-      const positionToInsert = circuit.indexOf(init);
-      if (positionToInsert === -1) {
-        // Se nao achar o caminho eh porque o grafo nao eh conectado.
-        // Como no exemplo_nao_euleriano2.txt
-        throw Error();
+          // Juntamos o circuito completo.
+          merged = [...beg, ...anotherCircuit, ...end];
+        }
       }
-
-      // O array beg eh dos itens que estao a frente da posicao a inserir
-      const beg = [...circuit].slice(0, positionToInsert);
-
-      // O array end nao contem o vertice que eh o init do novo grafo.
-      // Assim podemos inserir este novo circuito antes desta parte.
-      // Por exemplo, se o circuito antigo eh '1 2 3 4 1' e o novo eh '3 5 3'
-      // beg == [1, 2]
-      // ebd == [4, 1]
-      const end = [...circuit].slice(positionToInsert + 1);
-
-      // Juntamos o circuito completo.
-      const mergedCircuit = [...beg, ...newCircuit, ...end];
-
-      return HierholzerPath(vertices, mergedCircuit);
     }
   }
+
+  const nonUsed = circuitsWrapper.filter(w => !w.used);
+
+  if (nonUsed.length !== 0) {
+    // Se nao achar o caminho eh porque o grafo nao eh conectado.
+    // Como no exemplo_nao_euleriano2.txt
+    throw Error();
+  }
+
+  // -- Se C inclui todas arestas, eis o circuito euleriano.
+  // Se nao ha mais arestas para processar, basta retornar
+  // o circuito jah formatado como string e com o primeiro indice
+  // comecando em 1.
+  return merged.map(n => n + 1).join(" ");
+};
+
+const HierholzerPath = (vertices: Vertice[]): string => {
+  let edgesRemaining = flattenVertices(vertices);
+
+  // -- Comece de um vértice qualquer
+  // -- Crie um circuito C sem repetir aresta
+  // -- (ao usar uma aresta para chegar em um vértice escolha outra não usada para sair)
+  const startingCircuit = createCircuit([0], vertices);
+  let circuits: number[][] = [startingCircuit];
+
+  while (edgesRemaining.length !== 0) {
+    // Ainda ha arestas para processar
+    // -- Senão, enquanto C não incluir todas as arestas,
+    // -- construa outro circuito a partir de um vértice de C com arestas não usadas,
+
+    // Achamos um vertice que ainda tenha arestas disponiveis.
+    const init = findNonEmptyVerticeIndex(vertices, 0);
+
+    // Montamos um novo circuito comecando dessa aresta.
+    const newCircuit = createCircuit([init], vertices);
+
+    circuits = [...circuits, newCircuit];
+    edgesRemaining = flattenVertices(vertices);
+  }
+
+  // -- e "junte" esse circuito a C
+  // -- Se C inclui todas arestas, eis o circuito euleriano.
+
+  return mergeCircuits(circuits);
 };
