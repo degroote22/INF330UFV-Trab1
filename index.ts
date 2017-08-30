@@ -28,6 +28,28 @@ rl.on("line", line => {
   }
 });
 
+const initGraph = (line: string) => {
+  const numbers = line.split(" ") as [string, string];
+  graph.verticesNumber = Number(numbers[0]);
+  graph.edgesNumber = Number(numbers[1]);
+  graph.initialized = true;
+  for (let i = 0; i < graph.verticesNumber; i++) {
+    graph.vertices[i] = [];
+  }
+};
+
+const processLine = (line: string) => {
+  const numbers = line.split(" ") as [string, string];
+  // Como a contagem dos indices comeca de 1 no arquivo texto,
+  // aqui eh normalizado para comecar em 0.
+  const from = Number(numbers[0]) - 1;
+  const to = Number(numbers[1]) - 1;
+
+  // Cada vertice guarda o numero do outro vertice ao qual eh ligado.
+  graph.vertices[from] = [...graph.vertices[from], to];
+  graph.vertices[to] = [...graph.vertices[to], from];
+};
+
 rl.on("close", () => {
   if (hasOnlyEvenDegrees(graph.vertices)) {
     try {
@@ -63,26 +85,34 @@ const hasOnlyEvenDegrees = (vertices: Vertice[]): boolean =>
     return prevResult && isEven;
   }, true);
 
-const initGraph = (line: string) => {
-  const numbers = line.split(" ") as [string, string];
-  graph.verticesNumber = Number(numbers[0]);
-  graph.edgesNumber = Number(numbers[1]);
-  graph.initialized = true;
-  for (let i = 0; i < graph.verticesNumber; i++) {
-    graph.vertices[i] = [];
+const HierholzerPath = (vertices: Vertice[]): string => {
+  let edgesRemaining = flattenVertices(vertices);
+
+  // -- Comece de um vértice qualquer
+  // -- Crie um circuito C sem repetir aresta
+  // -- (ao usar uma aresta para chegar em um vértice escolha outra não usada para sair)
+  const startingCircuit = createCircuit([0], vertices);
+  let circuits: number[][] = [startingCircuit];
+
+  while (edgesRemaining.length !== 0) {
+    // Ainda ha arestas para processar
+    // -- Senão, enquanto C não incluir todas as arestas,
+    // -- construa outro circuito a partir de um vértice de C com arestas não usadas,
+
+    // Achamos um vertice que ainda tenha arestas disponiveis.
+    const init = findNonEmptyVerticeIndex(vertices, 0);
+
+    // Montamos um novo circuito comecando dessa aresta.
+    const newCircuit = createCircuit([init], vertices);
+
+    circuits = [...circuits, newCircuit];
+    edgesRemaining = flattenVertices(vertices);
   }
-};
 
-const processLine = (line: string) => {
-  const numbers = line.split(" ") as [string, string];
-  // Como a contagem dos indices comeca de 1 no arquivo texto,
-  // aqui eh normalizado para comecar em 0.
-  const from = Number(numbers[0]) - 1;
-  const to = Number(numbers[1]) - 1;
+  // -- e "junte" esse circuito a C
+  // -- Se C inclui todas arestas, eis o circuito euleriano.
 
-  // Cada vertice guarda o numero do outro vertice ao qual eh ligado.
-  graph.vertices[from] = [...graph.vertices[from], to];
-  graph.vertices[to] = [...graph.vertices[to], from];
+  return mergeCircuits(circuits);
 };
 
 const createCircuit = (circuit: number[], vertices: Vertice[]): number[] => {
@@ -173,34 +203,4 @@ const mergeCircuits = (circuits: number[][]): string => {
   // o circuito jah formatado como string e com o primeiro indice
   // comecando em 1.
   return merged.map(n => n + 1).join(" ");
-};
-
-const HierholzerPath = (vertices: Vertice[]): string => {
-  let edgesRemaining = flattenVertices(vertices);
-
-  // -- Comece de um vértice qualquer
-  // -- Crie um circuito C sem repetir aresta
-  // -- (ao usar uma aresta para chegar em um vértice escolha outra não usada para sair)
-  const startingCircuit = createCircuit([0], vertices);
-  let circuits: number[][] = [startingCircuit];
-
-  while (edgesRemaining.length !== 0) {
-    // Ainda ha arestas para processar
-    // -- Senão, enquanto C não incluir todas as arestas,
-    // -- construa outro circuito a partir de um vértice de C com arestas não usadas,
-
-    // Achamos um vertice que ainda tenha arestas disponiveis.
-    const init = findNonEmptyVerticeIndex(vertices, 0);
-
-    // Montamos um novo circuito comecando dessa aresta.
-    const newCircuit = createCircuit([init], vertices);
-
-    circuits = [...circuits, newCircuit];
-    edgesRemaining = flattenVertices(vertices);
-  }
-
-  // -- e "junte" esse circuito a C
-  // -- Se C inclui todas arestas, eis o circuito euleriano.
-
-  return mergeCircuits(circuits);
 };
