@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": ["esnext.asynciterable", "es6"],
+    "lib": [
+      "esnext.asynciterable",
+      "es6"
+    ],
     "module": "commonjs",
     "outDir": "./functions",
     "noImplicitAny": true,
@@ -9,6 +12,10 @@
     "noUnusedParameters": true,
     "noUnusedLocals": true
   },
-  "include": ["index.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "cli/index.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

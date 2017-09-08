@@ -8,6 +8,8 @@
     "typescript": "^2.4.2"
   },
   "scripts": {
-    "start": "tsc index.ts && node index.js"
+    "build:cli": "tsc cli/index.ts",
+    "run:cli": "cd cli && node index.js",
+    "cli": "npm run build:cli && npm run run:cli"
   }
 }
