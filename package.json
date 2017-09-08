@@ -5,11 +5,17 @@
   "license": "MIT",
   "dependencies": {
     "@types/node": "^8.0.26",
-    "typescript": "^2.4.2"
+    "serve": "^6.0.6",
+    "ts-loader": "^2.3.6",
+    "typescript": "^2.4.2",
+    "webpack": "^3.5.6"
   },
   "scripts": {
     "build:cli": "tsc cli/index.ts",
     "run:cli": "cd cli && node index.js",
-    "cli": "npm run build:cli && npm run run:cli"
+    "cli": "npm run build:cli && npm run run:cli",
+    "build:web": "webpack --config web/webpack.js",
+    "run:web": "serve web/public",
+    "web": "npm run build:web && npm run run:web"
   }
 }
