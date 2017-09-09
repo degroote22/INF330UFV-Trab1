@@ -16,9 +16,10 @@ class Graph {
   public isInitialized = () => this.initialized;
 
   public init = (line: string) => {
-    // pode ser q a gente ta atualizando o grafo
+    // Pode ser que estejamos reinicializando
     this.vertices = [];
     this.edges = [];
+
     const numbers = line.split(" ") as [string, string];
     this.verticesNumber = Number(numbers[0]);
     this.edgesNumber = Number(numbers[1]);
