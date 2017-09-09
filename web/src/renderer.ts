@@ -27,6 +27,11 @@ class Renderer {
     this.glCtx = canvas.getContext("2d") as CanvasRenderingContext2D;
   }
 
+  // public changeDimensions = (width: number, height: number) => {
+  //   this.width = width;
+  //   this.height = height;
+  // };
+
   private renderVertice = (left: number, top: number, n: number) => {
     this.glCtx.beginPath();
     this.glCtx.arc(left, top, this.diameter, 0, Math.PI * 2, false);
