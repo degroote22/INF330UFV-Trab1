@@ -19,6 +19,8 @@
     "build:webpack": " webpack --config web/webpack.js",
     "build:web": "npm run build:files && npm run build:webpack",
     "run:web": "serve web/build",
-    "web": "npm run build:web && npm run run:web"
+    "web": "npm run build:web && npm run run:web",
+    "pre":
+      "npm run build:web && rm -rf docs && mkdir docs && mv web/build/* docs"
   }
 }
