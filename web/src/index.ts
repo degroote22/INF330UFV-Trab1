@@ -6,19 +6,8 @@ import examples from "./examples";
 const handleSelectChange = (ev: Event) => {
   const n = (ev.target as HTMLSelectElement).value;
   const input = document.getElementById("input") as HTMLTextAreaElement;
-  switch (n) {
-    case "1": {
-      if (input) {
-        input.value = examples[0];
-      }
-      break;
-    }
-    case "2": {
-      if (input) {
-        input.value = examples[1];
-      }
-      break;
-    }
+  if (input) {
+    input.value = examples[Number(n)];
   }
 };
 
@@ -88,13 +77,14 @@ const handleCheck = (graph: Graph, renderer: Renderer) => {
         error: false,
         message: "É um grafo euleriano. Caminho: " + circuit
       });
+      renderer.render(graph.getEdges(), graph.getVerticesNumber());
       renderer.renderCircuit(circuit);
     } catch (error) {
       // No momento o algoritmo de procurar o caminho vai lancar
       // um erro se ele perceber que o grafo nao eh conectado.
       displayMessage({
         error: true,
-        message: "Não é um grafo euleriano. O grafo não é conectado"
+        message: "Não é um grafo euleriano. O grafo não é conectado."
       });
     }
   } else {
@@ -102,7 +92,7 @@ const handleCheck = (graph: Graph, renderer: Renderer) => {
     // que o grafo nao eh euleriano.
     displayMessage({
       error: true,
-      message: "Não é um grafo euleriano. Há algum vertice com grau ímpar"
+      message: "Não é um grafo euleriano. Há algum vertice com grau ímpar."
     });
   }
 };

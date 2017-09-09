@@ -1,5 +1,7 @@
 import { Edge } from "../../shared/graph";
 
+const colorGrey = "rgba(66,66,66,0.5)";
+
 type RenderedVertice = {
   left: number;
   top: number;
@@ -10,12 +12,14 @@ class Renderer {
   private height = 0;
   private vertices: RenderedVertice[] = [];
   private renderedEdges: Edge[] = [];
+  private renderedArrows: Edge[] = [];
   private glCtx: CanvasRenderingContext2D;
-  private diameter = 20;
+  private diameter: number;
 
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
+    this.diameter = width / 25;
     const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 
     canvas.height = height;
@@ -26,14 +30,27 @@ class Renderer {
   private renderVertice = (left: number, top: number, n: number) => {
     this.glCtx.beginPath();
     this.glCtx.arc(left, top, this.diameter, 0, Math.PI * 2, false);
-    this.glCtx.fillStyle = "#000000";
+    this.glCtx.fillStyle = "#01579B";
     this.glCtx.fill();
     this.glCtx.closePath();
 
-    this.glCtx.font = "30px Arial";
+    this.glCtx.font = `${Math.floor(this.diameter)}px Arial`;
     this.glCtx.fillStyle = "white";
     this.glCtx.textAlign = "center";
-    this.glCtx.fillText(String(n), left, top + this.diameter / 2);
+    this.glCtx.fillText(String(n), left, top + this.diameter / 4);
+  };
+
+  private renderedArrowsBetween = (from: number, to: number) => {
+    let n = 0;
+    this.renderedArrows.forEach(edge => {
+      if (
+        (edge[0] === from && edge[1] === to) ||
+        (edge[0] === to && edge[1] === from)
+      ) {
+        n++;
+      }
+    });
+    return n;
   };
 
   private renderedEdgesBetween = (from: number, to: number) => {
@@ -59,7 +76,7 @@ class Renderer {
     this.glCtx.moveTo(fromLeft, fromTop);
     this.glCtx.lineTo(toLeft, toTop);
     this.glCtx.lineWidth = this.diameter / 2;
-    this.glCtx.strokeStyle = "rgba(0,0,0,0.5)";
+    this.glCtx.strokeStyle = colorGrey;
     this.glCtx.stroke();
     this.glCtx.closePath();
   };
@@ -80,7 +97,7 @@ class Renderer {
       toTop
     );
     this.glCtx.lineWidth = this.diameter / 2;
-    this.glCtx.strokeStyle = "rgba(0,0,0,0.5)";
+    this.glCtx.strokeStyle = colorGrey;
     this.glCtx.stroke();
     this.glCtx.closePath();
   };
@@ -96,7 +113,7 @@ class Renderer {
       false
     );
     this.glCtx.lineWidth = this.diameter / 2;
-    this.glCtx.strokeStyle = "rgba(0,0,0,0.5)";
+    this.glCtx.strokeStyle = colorGrey;
     this.glCtx.stroke();
     this.glCtx.closePath();
   };
@@ -108,12 +125,12 @@ class Renderer {
       edges.push([circuit[i], circuit[i + 1]]);
     }
 
-    edges.forEach(edge => {
-      this.renderArrow(edge);
-    });
+    this.renderedArrows = [];
+
+    edges.forEach(this.renderArrow);
   };
 
-  private renderArrow = (edge: Edge) => {
+  private renderArrow = (edge: Edge, index: number) => {
     const from = edge[0];
     const to = edge[1];
 
@@ -122,20 +139,40 @@ class Renderer {
     const fromTop = this.vertices[from].top;
     const toLeft = this.vertices[to].left;
     const toTop = this.vertices[to].top;
+    const a = Math.atan((toTop - fromTop) / (toLeft - fromLeft));
 
-    const angle = Math.atan((fromTop - toTop) / (fromLeft - toLeft));
-    console.log("ra", edge.map(n => n + 1), angle);
+    const angle = fromLeft - toLeft > 1 ? a - Math.PI : a;
 
-    const initLeft = (fromLeft + toLeft) / 2;
+    const initLeft =
+      (fromLeft + toLeft) / 2 -
+      this.renderedArrowsBetween(from, to) * this.diameter * 1.5;
     const initTop = (fromTop + toTop) / 2;
+    this.glCtx.save();
+    this.glCtx.translate(initLeft, initTop);
+    this.glCtx.rotate(angle);
 
     this.glCtx.beginPath();
-    this.glCtx.moveTo(initLeft, initTop);
-    this.glCtx.lineTo(initLeft - this.diameter, initTop - this.diameter);
-    this.glCtx.lineTo(initLeft - this.diameter, initTop + this.diameter);
-    this.glCtx.fillStyle = "rgba(0, 255, 0, 0.5)";
+    this.glCtx.moveTo(-this.diameter * 2, -this.diameter);
+    this.glCtx.lineTo(-this.diameter * 2, this.diameter);
+    this.glCtx.lineTo(this.diameter * 2, 0);
+    this.glCtx.fillStyle = "rgba(33,150,243, 0.5)";
     this.glCtx.fill();
     this.glCtx.closePath();
+
+    this.glCtx.restore();
+
+    this.glCtx.font = `${Math.floor(this.diameter)}px Arial`;
+    this.glCtx.fillStyle = "white";
+    this.glCtx.textAlign = "center";
+
+    this.glCtx.fillText(
+      "abcdefghijklmnopqrstuvxwyz"[index % 26],
+      (initLeft + (fromLeft + initLeft) / 2) / 2 -
+        this.renderedArrowsBetween(from, to) * this.diameter * 0.3,
+      (initTop + (fromTop + initTop) / 2) / 2 + this.diameter / 4
+    );
+
+    this.renderedArrows.push([from, to]);
   };
 
   private renderEdge = (edge: Edge) => {

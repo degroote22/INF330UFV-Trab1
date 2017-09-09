@@ -1,4 +1,4 @@
-const ex1 = `6 8
+const eulerian = `6 8
 1 2
 1 4
 1 2
@@ -8,7 +8,7 @@ const ex1 = `6 8
 4 3
 3 5`;
 
-const ex2 = `8 8
+const nonEulerian = `8 8
 1 2
 2 7
 3 4
@@ -18,4 +18,24 @@ const ex2 = `8 8
 3 6
 5 6`;
 
-export default [ex1, ex2];
+const eulerian2 = `6 7
+2 3
+1 4
+1 2
+3 6
+6 5
+4 3
+3 5`;
+
+const eulerian3 = `6 9
+1 2
+1 4
+1 2
+3 1
+3 6
+4 6
+5 4
+4 3
+3 5`;
+
+export default [eulerian, nonEulerian, eulerian2, eulerian3];

@@ -3,6 +3,7 @@ const webpack = require("webpack"); //to access built-in plugins
 
 module.exports = {
   entry: "./web/src/index.ts",
+  // devtool: "cheap-module-eval-source-map",
   output: {
     // path: './build/',
     path: path.resolve(__dirname, "../web/build"),

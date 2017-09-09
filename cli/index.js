@@ -4,10 +4,10 @@ var fs = require("fs");
 var readline = require("readline");
 var HierholzerPath_1 = require("../shared/HierholzerPath");
 var graph_1 = require("../shared/graph");
-var graph = new graph_1["default"];
+var graph = new graph_1["default"]();
 var rl = readline.createInterface({
     // input: fs.createReadStream("exemplo_nao_euleriano2.txt")
-    input: fs.createReadStream("exemplo.txt")
+    input: fs.createReadStream(process.argv[2])
 });
 rl.on("line", function (line) {
     if (graph.isInitialized()) {

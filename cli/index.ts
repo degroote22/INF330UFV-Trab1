@@ -1,12 +1,12 @@
 import * as fs from "fs";
 import * as readline from "readline";
-import HierholzerPath from '../shared/HierholzerPath'
-import Graph, { Vertice } from '../shared/graph'
+import HierholzerPath from "../shared/HierholzerPath";
+import Graph, { Vertice } from "../shared/graph";
 
-const graph = new Graph
+const graph = new Graph();
 const rl = readline.createInterface({
   // input: fs.createReadStream("exemplo_nao_euleriano2.txt")
-  input: fs.createReadStream("exemplo.txt")
+  input: fs.createReadStream(process.argv[2])
 });
 
 rl.on("line", line => {

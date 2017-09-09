@@ -66,7 +66,7 @@ var mergeCircuits = function (circuits) {
     if (circuits.length !== 0) {
         // Se nao achar o caminho eh porque o grafo nao eh conectado.
         // Como no exemplo_nao_euleriano2.txt
-        throw Error();
+        throw Error("O grafo nao eh conectado");
     }
     // -- Se C inclui todas arestas, eis o circuito euleriano.
     // Se nao ha mais arestas para processar, basta retornar
@@ -75,12 +75,12 @@ var mergeCircuits = function (circuits) {
     return merged.map(function (n) { return n + 1; }).join(" ");
 };
 var HierholzerPath = function (vertices) {
-    var edgesRemaining = flattenVertices(vertices);
     // -- Comece de um vértice qualquer
     // -- Crie um circuito C sem repetir aresta
     // -- (ao usar uma aresta para chegar em um vértice escolha outra não usada para sair)
     var startingCircuit = createCircuit([0], vertices);
     var circuits = [startingCircuit];
+    var edgesRemaining = flattenVertices(vertices);
     while (edgesRemaining.length !== 0) {
         // Ainda ha arestas para processar
         // -- Senão, enquanto C não incluir todas as arestas,
