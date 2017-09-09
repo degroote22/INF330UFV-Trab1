@@ -155,8 +155,12 @@ class Renderer {
     this.glCtx.moveTo(-this.diameter * 2, -this.diameter);
     this.glCtx.lineTo(-this.diameter * 2, this.diameter);
     this.glCtx.lineTo(this.diameter * 2, 0);
-    this.glCtx.fillStyle = "rgba(33,150,243, 0.5)";
+    this.glCtx.lineTo(-this.diameter * 2, -this.diameter);
+    this.glCtx.fillStyle = "rgb(33,150,243)";
     this.glCtx.fill();
+    this.glCtx.lineWidth = this.diameter / 20;
+    this.glCtx.strokeStyle = "white";
+    this.glCtx.stroke();
     this.glCtx.closePath();
 
     this.glCtx.restore();

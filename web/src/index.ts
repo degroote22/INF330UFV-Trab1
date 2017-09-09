@@ -17,6 +17,7 @@ const loadSampleGraph = (graph: Graph, renderer: Renderer) => {
     input.value = examples[0];
   }
   handleRefresh(graph, renderer);
+  handleCheck(graph, renderer);
 };
 
 const handleRefresh = (graph: Graph, renderer: Renderer) => {
@@ -108,7 +109,11 @@ const init = () => {
 
   const select = document.getElementById("input_select");
   if (select) {
-    select.addEventListener("change", handleSelectChange);
+    select.addEventListener("change", ev => {
+      handleSelectChange(ev);
+      handleRefresh(graph, renderer);
+      handleCheck(graph, renderer);
+    });
   }
 
   const refresh = document.getElementById("refresh");
