@@ -14,8 +14,11 @@
     "build:cli": "tsc cli/index.ts",
     "run:cli": "cd cli && node index.js",
     "cli": "npm run build:cli && npm run run:cli",
-    "build:web": "webpack --config web/webpack.js",
-    "run:web": "serve web/public",
+    "build:files":
+      "rm -rf web/build && mkdir web/build && cp web/public/* web/build",
+    "build:webpack": " webpack --config web/webpack.js",
+    "build:web": "npm run build:files && npm run build:webpack",
+    "run:web": "serve web/build",
     "web": "npm run build:web && npm run run:web"
   }
 }
