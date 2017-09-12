@@ -11,11 +11,15 @@ O segundo procura um caminho euleriano no grafo usando o algoritomo de Hierholze
 ## Linha de comando:
 1. Tenha o Node 6 ou maior e o NPM 3 ou maior instalado.
 2. Abra esta pasta no terminal.
-2. Execute 'npm run cli' para gerar o código e executar com o arquivo exemplo.txt.
-3. Execute 'npm run build:cli' para gerar o código.
-4. Execute 'cd cli && node index.js qualquerarquivo.txt' para rodar com qualquer arquivo.
+3. Execute 'npm install' para instalar o compilador e as dependências.
+4. Execute 'npm run cli' para gerar o código e executar com o arquivo exemplo.txt.
+5. Execute 'npm run build:cli' para gerar o código.
+6. Execute 'cd cli && node index.js qualquerarquivo.txt' para rodar com qualquer arquivo.
 
 ## Website:
-1. Execute 'npm run web' para gerar o código e servir e a partir de um servidor local.
-2. Execute 'npm run pre' para gerar o código do Github Pages.
-3. Faça commit no github para atualizar o site.
+1. Tenha o Node 6 ou maior e o NPM 3 ou maior instalado.
+2. Abra esta pasta no terminal.
+3. Execute 'npm install' para instalar o compilador e as dependências.
+4. Execute 'npm run web' para gerar o código e servir e a partir de um servidor local.
+5. Execute 'npm run pre' para gerar o código do Github Pages.
+6. Faça commit no github para atualizar o site.
